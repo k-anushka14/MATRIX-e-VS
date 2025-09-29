@@ -1,17 +1,56 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { useElection } from '@/contexts/ElectionContext';
+import { useVotingFlow } from '@/hooks/useVotingFlow';
 
 export const Register = () => {
+  const { electionId } = useParams();
+  const navigate = useNavigate();
+  const { elections, registerVoter } = useElection();
+  const { completeRegistration } = useVotingFlow();
+  
   const [step, setStep] = useState<'upload' | 'hash' | 'biometric' | 'verify' | 'complete'>('upload');
   const [idFile, setIdFile] = useState<File | null>(null);
+  const [addressFile, setAddressFile] = useState<File | null>(null);
   const [digitalFingerprint, setDigitalFingerprint] = useState('');
+  const [biometricHash, setBiometricHash] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addressInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const currentElection = elections.find(e => e.id === electionId);
+
+  useEffect(() => {
+    if (!currentElection) {
+      setError('Election not found or invalid election ID');
+      return;
+    }
+
+    const now = new Date();
+    if (now < currentElection.startDate) {
+      setError('Voting has not started yet');
+    } else if (now > currentElection.endDate) {
+      setError('Voting period has ended');
+    }
+  }, [currentElection]);
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   // Hash ID using WebCrypto
   const hashIDDocument = async (file: File): Promise<string> => {
@@ -25,24 +64,79 @@ export const Register = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type and size
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!validTypes.includes(file.type)) {
+      setError('Please upload a valid image (JPEG, PNG) or PDF file');
+      return;
+    }
+
+    if (file.size > maxSize) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
     setIdFile(file);
+    setError('');
+  };
+
+  const handleAddressUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type and size
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!validTypes.includes(file.type)) {
+      setError('Please upload a valid image (JPEG, PNG) or PDF file');
+      return;
+    }
+
+    if (file.size > maxSize) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
+    setAddressFile(file);
+    setError('');
+  };
+
+  const processDocuments = async () => {
+    if (!idFile || !addressFile) {
+      setError('Please upload both ID proof and address proof documents');
+      return;
+    }
+
     setIsProcessing(true);
     setStep('hash');
+    setError('');
 
     try {
       // Simulate processing delay with glitch effect
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const hash = await hashIDDocument(file);
-      setDigitalFingerprint(hash);
+      const idHash = await hashIDDocument(idFile);
+      const addressHash = await hashIDDocument(addressFile);
+      
+      // Combine both hashes for a unique voter fingerprint
+      const combinedHash = await crypto.subtle.digest('SHA-256', 
+        new TextEncoder().encode(idHash + addressHash)
+      );
+      const fingerprint = Array.from(new Uint8Array(combinedHash))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      setDigitalFingerprint(fingerprint);
       
       toast.success('Digital fingerprint created successfully!', {
-        description: 'Your ID has been securely hashed and anonymized.'
+        description: 'Your documents have been securely hashed and anonymized.'
       });
       
       setStep('biometric');
     } catch (error) {
-      toast.error('Failed to process ID document');
+      toast.error('Failed to process documents');
       setStep('upload');
     } finally {
       setIsProcessing(false);
@@ -55,7 +149,26 @@ export const Register = () => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-      setStep('verify');
+      
+      // Simulate biometric capture and hashing
+      setTimeout(() => {
+        const biometricHash = `bio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        setBiometricHash(biometricHash);
+        
+        // Turn off camera after biometric verification
+        if (videoRef.current && videoRef.current.srcObject) {
+          const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+          tracks.forEach(track => track.stop());
+          videoRef.current.srcObject = null;
+        }
+        
+        toast.success('Biometric verification completed!', {
+          description: 'Camera has been turned off for privacy.'
+        });
+        
+        setStep('verify');
+      }, 3000);
+      
     } catch (error) {
       toast.error('Camera access denied. Proceeding without biometric verification.');
       setStep('verify');
@@ -63,20 +176,70 @@ export const Register = () => {
   };
 
   const verifyVoterEligibility = async () => {
+    if (!currentElection) return;
+    
     setIsProcessing(true);
+    setError('');
+    
+    // Add timeout to prevent getting stuck
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Verification timeout')), 10000); // 10 second timeout
+    });
     
     try {
-      // Simulate blockchain verification
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      const verificationPromise = (async () => {
+        // Simulate blockchain verification with progress updates
+        const steps = [
+          'Connecting to blockchain network...',
+          'Verifying voter eligibility...',
+          'Checking for duplicate registrations...',
+          'Generating voter token...',
+          'Recording on blockchain...'
+        ];
+
+        for (let i = 0; i < steps.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          console.log(`Step ${i + 1}: ${steps[i]}`);
+        }
+        
+        // Register voter in the election context
+        const voterId = `voter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        registerVoter({
+          id: voterId,
+          electionId: currentElection.id,
+          voterId: digitalFingerprint,
+          documents: {
+            idProof: idFile?.name,
+            addressProof: addressFile?.name
+          },
+          biometricHash: biometricHash || undefined,
+          isVerified: true,
+          registrationDate: new Date()
+        });
+
+        // Update voting flow state
+        completeRegistration(digitalFingerprint);
+        
+        return true;
+      })();
+
+      await Promise.race([verificationPromise, timeoutPromise]);
       
-      // Mock successful verification
       toast.success('Voter verification successful!', {
         description: 'You are now registered and eligible to vote.'
       });
       
       setStep('complete');
     } catch (error) {
-      toast.error('Verification failed. Please try again.');
+      console.error('Verification error:', error);
+      const errorMessage = error instanceof Error && error.message === 'Verification timeout' 
+        ? 'Verification timed out. Please try again.' 
+        : 'Verification failed. Please try again.';
+      
+      toast.error(errorMessage);
+      setError(errorMessage);
+      setStep('verify'); // Go back to verification step
     } finally {
       setIsProcessing(false);
     }
@@ -89,10 +252,29 @@ export const Register = () => {
           <h1 className="text-4xl font-bold matrix-text mb-4">
             <span className="animate-digital-form">VOTER REGISTRATION</span>
           </h1>
+          {currentElection && (
+            <div className="mb-4">
+              <h2 className="text-2xl font-semibold matrix-text mb-2">
+                {currentElection.title}
+              </h2>
+              <p className="text-matrix-glow text-lg mb-2">
+                {currentElection.description}
+              </p>
+              <div className="text-sm text-matrix-glow">
+                Voting Period: {currentElection.startDate.toLocaleDateString()} - {currentElection.endDate.toLocaleDateString()}
+              </div>
+            </div>
+          )}
           <p className="text-matrix-glow text-lg">
             Secure identity verification through blockchain technology
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Main Registration Flow */}
@@ -116,22 +298,63 @@ export const Register = () => {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {/* Step 1: ID Upload */}
+              {/* Step 1: Document Upload */}
               {step === 'upload' && (
-                <div className="space-y-4">
-                  <Label htmlFor="id-upload" className="matrix-text">
-                    Select ID Document (Aadhaar, Voter ID, Driver's License)
-                  </Label>
-                  <Input
-                    ref={fileInputRef}
-                    id="id-upload"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleIDUpload}
-                    className="matrix-input"
-                  />
-                  <p className="text-sm text-matrix-glow">
-                    Your document will be hashed locally and never stored in its original form.
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <Label htmlFor="id-upload" className="matrix-text">
+                      ID Proof Document *
+                    </Label>
+                    <Input
+                      ref={fileInputRef}
+                      id="id-upload"
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleIDUpload}
+                      className="matrix-input"
+                    />
+                    <p className="text-sm text-matrix-glow">
+                      Upload Aadhaar, Voter ID, Driver's License, or Passport
+                    </p>
+                    {idFile && (
+                      <div className="p-2 bg-matrix-dark/30 rounded border border-matrix-neon/20">
+                        <p className="text-sm text-matrix-neon">✓ {idFile.name}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label htmlFor="address-upload" className="matrix-text">
+                      Address Proof Document *
+                    </Label>
+                    <Input
+                      ref={addressInputRef}
+                      id="address-upload"
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleAddressUpload}
+                      className="matrix-input"
+                    />
+                    <p className="text-sm text-matrix-glow">
+                      Upload utility bill, bank statement, or rental agreement
+                    </p>
+                    {addressFile && (
+                      <div className="p-2 bg-matrix-dark/30 rounded border border-matrix-neon/20">
+                        <p className="text-sm text-matrix-neon">✓ {addressFile.name}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    onClick={processDocuments}
+                    disabled={!idFile || !addressFile}
+                    className="matrix-button w-full"
+                  >
+                    &gt; Process Documents
+                  </Button>
+
+                  <p className="text-xs text-matrix-glow text-center">
+                    Documents will be hashed locally and never stored in their original form.
                   </p>
                 </div>
               )}
@@ -196,18 +419,46 @@ export const Register = () => {
                           VERIFYING...
                         </div>
                         <div className="space-y-2 font-mono text-sm text-matrix-glow">
-                          <div className="animate-pulse">&gt; Checking electoral blockchain...</div>
-                          <div className="animate-pulse">&gt; Validating voter eligibility...</div>
+                          <div className="animate-pulse">&gt; Connecting to blockchain network...</div>
+                          <div className="animate-pulse">&gt; Verifying voter eligibility...</div>
+                          <div className="animate-pulse">&gt; Checking for duplicate registrations...</div>
                           <div className="animate-pulse">&gt; Generating voter token...</div>
+                          <div className="animate-pulse">&gt; Recording on blockchain...</div>
+                        </div>
+                        <div className="mt-4">
+                          <div className="w-full bg-matrix-dark/50 rounded-full h-2">
+                            <div className="bg-matrix-neon h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <Button 
-                        onClick={verifyVoterEligibility}
-                        className="matrix-button w-full"
-                      >
-                        &gt; Verify Voter Eligibility
-                      </Button>
+                      <div className="space-y-4">
+                        <Button 
+                          onClick={verifyVoterEligibility}
+                          className="matrix-button w-full"
+                          disabled={isProcessing}
+                        >
+                          &gt; Verify Voter Eligibility
+                        </Button>
+                        <p className="text-xs text-matrix-glow">
+                          This process will verify your identity and register you for voting
+                        </p>
+                        {error && (
+                          <div className="mt-4">
+                            <Alert variant="destructive">
+                              <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                            <Button 
+                              onClick={verifyVoterEligibility}
+                              variant="outline"
+                              className="matrix-button w-full mt-2"
+                              disabled={isProcessing}
+                            >
+                              &gt; Retry Verification
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -221,10 +472,10 @@ export const Register = () => {
                     REGISTRATION COMPLETE
                   </div>
                   <p className="text-matrix-glow mb-6">
-                    You have been successfully registered in the voting system.
+                    You have been successfully registered for the election.
                   </p>
                   <Button 
-                    onClick={() => window.location.href = '/vote'}
+                    onClick={() => navigate(`/vote/${currentElection?.id || ''}`)}
                     className="matrix-button"
                   >
                     &gt; Proceed to Vote

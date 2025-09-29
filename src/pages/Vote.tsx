@@ -1,48 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-
-interface Candidate {
-  id: string;
-  name: string;
-  party: string;
-  description: string;
-}
+import { useElection } from '@/contexts/ElectionContext';
+import { useVotingFlow } from '@/hooks/useVotingFlow';
 
 export const Vote = () => {
+  const { electionId } = useParams();
+  const navigate = useNavigate();
+  const { elections, addVote, isVotingActive } = useElection();
+  const { votingState, completeVoting } = useVotingFlow();
+  
   const [selectedCandidate, setSelectedCandidate] = useState<string>('');
   const [isVoting, setIsVoting] = useState(false);
   const [voteComplete, setVoteComplete] = useState(false);
+  const [error, setError] = useState('');
 
-  const candidates: Candidate[] = [
-    {
-      id: 'candidate1',
-      name: 'Alice Chen',
-      party: 'Digital Democratic Party',
-      description: 'Advocate for blockchain transparency and digital rights'
-    },
-    {
-      id: 'candidate2', 
-      name: 'Bob Matrix',
-      party: 'Cybersecurity Alliance',
-      description: 'Expert in decentralized systems and privacy protection'
-    },
-    {
-      id: 'candidate3',
-      name: 'Carol Cipher',
-      party: 'Future Tech Coalition', 
-      description: 'Pioneer in quantum-resistant cryptography'
-    },
-    {
-      id: 'candidate4',
-      name: 'David Protocol',
-      party: 'Open Source Movement',
-      description: 'Champion of distributed governance and transparency'
+  const currentElection = elections.find(e => e.id === electionId);
+
+  useEffect(() => {
+    if (!currentElection) {
+      setError('Election not found or invalid election ID');
+      return;
     }
-  ];
+
+    // Redirect to registration if not registered
+    if (!votingState.isRegistered) {
+      navigate(`/register/${electionId}`);
+      return;
+    }
+
+    if (votingState.hasVoted) {
+      setVoteComplete(true);
+      return;
+    }
+
+    if (!isVotingActive(currentElection.id)) {
+      setError('Voting is not currently active for this election');
+      return;
+    }
+  }, [currentElection, votingState, isVotingActive, navigate, electionId]);
+
+  const candidates = currentElection?.candidates || [];
 
   const encryptVote = async (candidateId: string): Promise<string> => {
     const encoder = new TextEncoder();
@@ -73,30 +76,49 @@ export const Vote = () => {
   };
 
   const submitVote = async () => {
-    if (!selectedCandidate) {
+    if (!selectedCandidate || !currentElection) {
       toast.error('Please select a candidate');
       return;
     }
 
     setIsVoting(true);
+    setError('');
 
     try {
       // Encrypt the vote client-side
       const encryptedVote = await encryptVote(selectedCandidate);
       
+      // Generate voter ID hash (from registration)
+      const voterIdHash = votingState.digitalFingerprint || 'anonymous';
+      
       // Simulate blockchain submission delay
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Mock IPFS upload
-      const ipfsHash = `Qm${Math.random().toString(36).substring(2, 15)}`;
+      // Create vote record
+      const voteRecord = {
+        id: `vote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        electionId: currentElection.id,
+        candidateId: selectedCandidate,
+        voterId: voterIdHash,
+        encryptedVote,
+        timestamp: new Date(),
+        blockHash: `0x${Math.random().toString(16).substr(2, 64)}` // Simulated blockchain hash
+      };
+
+      // Add vote to election context (simulates blockchain storage)
+      addVote(voteRecord);
+      
+      // Update voting flow state
+      completeVoting();
       
       toast.success('Vote cast successfully!', {
-        description: `Your encrypted vote has been recorded. IPFS Hash: ${ipfsHash.slice(0, 10)}...`
+        description: 'Your encrypted vote has been recorded on the blockchain.'
       });
       
       setVoteComplete(true);
     } catch (error) {
       toast.error('Failed to cast vote. Please try again.');
+      setError('Failed to cast vote. Please try again.');
     } finally {
       setIsVoting(false);
     }
@@ -114,22 +136,35 @@ export const Vote = () => {
             <p className="text-matrix-glow text-lg mb-8">
               Your encrypted vote has been securely submitted to the blockchain.
             </p>
+            {currentElection && (
+              <div className="mb-6 p-4 bg-primary/10 rounded border border-primary/30">
+                <h3 className="matrix-text font-semibold mb-2">{currentElection.title}</h3>
+                <p className="text-matrix-glow text-sm">Election ID: {currentElection.id}</p>
+              </div>
+            )}
             <div className="space-y-4 text-sm matrix-text">
               <div className="p-4 bg-primary/10 rounded border border-primary/30">
                 <div className="font-mono text-xs space-y-1">
                   <div>&gt; Vote encrypted with AES-256-GCM</div>
-                  <div>&gt; Submitted to IPFS distributed storage</div>
+                  <div>&gt; Submitted to blockchain storage</div>
                   <div>&gt; Blockchain commitment recorded</div>
                   <div>&gt; Voter token burned (preventing double voting)</div>
                 </div>
               </div>
             </div>
-            <div className="mt-8">
+            <div className="mt-8 space-x-4">
               <Button 
-                onClick={() => window.location.href = '/verify'}
+                onClick={() => navigate(`/results/${currentElection?.id || ''}`)}
                 className="matrix-button"
               >
-                &gt; Verify Vote
+                &gt; View Results
+              </Button>
+              <Button 
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="matrix-button"
+              >
+                &gt; Home
               </Button>
             </div>
           </CardContent>
@@ -145,10 +180,29 @@ export const Vote = () => {
           <h1 className="text-4xl font-bold matrix-text mb-4">
             <span className="animate-digital-form">CAST YOUR VOTE</span>
           </h1>
+          {currentElection && (
+            <div className="mb-4">
+              <h2 className="text-2xl font-semibold matrix-text mb-2">
+                {currentElection.title}
+              </h2>
+              <p className="text-matrix-glow text-lg mb-2">
+                {currentElection.description}
+              </p>
+              <div className="text-sm text-matrix-glow">
+                Voting Period: {currentElection.startDate.toLocaleDateString()} - {currentElection.endDate.toLocaleDateString()}
+              </div>
+            </div>
+          )}
           <p className="text-matrix-glow text-lg">
             Select your candidate. Your vote will be encrypted and secured on-chain.
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Candidate Selection */}
@@ -187,12 +241,11 @@ export const Vote = () => {
                           <div className="font-semibold text-lg text-matrix-bright">
                             {candidate.name}
                           </div>
-                          <div className="text-matrix-neon text-sm font-medium mb-2">
-                            {candidate.party}
-                          </div>
-                          <div className="text-matrix-glow text-sm">
-                            {candidate.description}
-                          </div>
+                          {candidate.description && (
+                            <div className="text-matrix-glow text-sm mt-1">
+                              {candidate.description}
+                            </div>
+                          )}
                         </div>
                       </Label>
                     </div>

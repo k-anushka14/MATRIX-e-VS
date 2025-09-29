@@ -1,143 +1,288 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { ArrowLeft, Download, Trophy, Users, BarChart3 } from 'lucide-react';
+
+interface Election {
+  id: string;
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  totalVoters: number;
+  candidates: Candidate[];
+  votingLink: string;
+  createdAt: Date;
+}
+
+interface Candidate {
+  id: string;
+  name: string;
+  description: string;
+  logo: string;
+}
 
 interface VoteResult {
-  candidate: string;
-  party: string;
+  candidateId: string;
+  candidateName: string;
   votes: number;
   percentage: number;
   color: string;
 }
 
-export const Results = () => {
-  const [isDecrypting, setIsDecrypting] = useState(true);
+interface Vote {
+  id: string;
+  electionId: string;
+  candidateId: string;
+  voterId: string;
+  encryptedVote: string;
+  timestamp: Date;
+  blockHash: string;
+}
+
+const Results = () => {
+  const { electionId } = useParams();
+  const navigate = useNavigate();
+  
+  const [currentElection, setCurrentElection] = useState<Election | null>(null);
   const [results, setResults] = useState<VoteResult[]>([]);
   const [totalVotes, setTotalVotes] = useState(0);
-  const [decryptionProgress, setDecryptionProgress] = useState(0);
+  const [turnoutPercentage, setTurnoutPercentage] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const mockResults: VoteResult[] = [
-    { candidate: 'Alice Chen', party: 'Digital Democratic Party', votes: 4250, percentage: 42.5, color: '#00ff41' },
-    { candidate: 'Bob Matrix', party: 'Cybersecurity Alliance', votes: 2890, percentage: 28.9, color: '#00cc33' },
-    { candidate: 'Carol Cipher', party: 'Future Tech Coalition', votes: 1920, percentage: 19.2, color: '#008f11' },
-    { candidate: 'David Protocol', party: 'Open Source Movement', votes: 940, percentage: 9.4, color: '#004d00' }
-  ];
+  // Colors for charts
+  const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16'];
 
   useEffect(() => {
-    const decryptVotes = async () => {
-      // Simulate threshold decryption process
-      const totalSteps = 100;
-      
-      for (let i = 0; i <= totalSteps; i++) {
-        await new Promise(resolve => setTimeout(resolve, 50));
-        setDecryptionProgress(i);
-      }
-      
-      // Simulate final results compilation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setResults(mockResults);
-      setTotalVotes(mockResults.reduce((sum, result) => sum + result.votes, 0));
-      setIsDecrypting(false);
+    // Load election data
+    const elections = JSON.parse(localStorage.getItem('elections') || '[]');
+    const election = elections.find((e: any) => e.id === electionId);
+    
+    if (!election) {
+      setError('Election not found');
+      setIsLoading(false);
+      return;
+    }
+
+    // Convert date strings back to Date objects
+    const electionWithDates = {
+      ...election,
+      startDate: new Date(election.startDate),
+      endDate: new Date(election.endDate),
+      createdAt: new Date(election.createdAt)
     };
 
-    decryptVotes();
-  }, []);
+    setCurrentElection(electionWithDates);
 
-  if (isDecrypting) {
+    // Check if election has ended
+    const now = new Date();
+    if (now < electionWithDates.endDate) {
+      setError('Results are only available after the election ends');
+      setIsLoading(false);
+      return;
+    }
+
+    // Load votes and calculate results
+    setTimeout(() => {
+      calculateResults(electionWithDates);
+      setIsLoading(false);
+    }, 2000);
+  }, [electionId]);
+
+  const calculateResults = (election: Election) => {
+    // Load votes
+    const votes: Vote[] = JSON.parse(localStorage.getItem('votes') || '[]');
+    const electionVotes = votes.filter(vote => vote.electionId === election.id);
+    
+    setTotalVotes(electionVotes.length);
+    setTurnoutPercentage((electionVotes.length / election.totalVoters) * 100);
+
+    // Calculate candidate results
+    const candidateResults: VoteResult[] = election.candidates.map((candidate, index) => {
+      const candidateVotes = electionVotes.filter(vote => vote.candidateId === candidate.id).length;
+      const percentage = electionVotes.length > 0 ? (candidateVotes / electionVotes.length) * 100 : 0;
+      
+      return {
+        candidateId: candidate.id,
+        candidateName: candidate.name,
+        votes: candidateVotes,
+        percentage: percentage,
+        color: colors[index % colors.length]
+      };
+    });
+
+    setResults(candidateResults);
+  };
+
+  const getWinner = () => {
+    if (results.length === 0) return null;
+    return results.reduce((prev, current) => (prev.votes > current.votes) ? prev : current);
+  };
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen p-6 flex items-center justify-center">
-        <Card className="matrix-terminal max-w-2xl w-full">
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card className="w-full max-w-2xl">
           <CardContent className="text-center py-12">
-            <div className="text-4xl matrix-text mb-6 animate-glitch">
-              DECRYPTING VOTES...
-            </div>
-            
-            <div className="space-y-6">
-              <Progress value={decryptionProgress} className="w-full" />
-              
-              <div className="space-y-2 font-mono text-sm text-matrix-glow">
-                <div className={`transition-opacity ${decryptionProgress > 10 ? 'opacity-100' : 'opacity-50'}`}>
-                  &gt; Collecting encrypted votes from IPFS...
-                </div>
-                <div className={`transition-opacity ${decryptionProgress > 30 ? 'opacity-100' : 'opacity-50'}`}>
-                  &gt; Gathering decryption keys from nodes...
-                </div>
-                <div className={`transition-opacity ${decryptionProgress > 50 ? 'opacity-100' : 'opacity-50'}`}>
-                  &gt; Performing threshold decryption...
-                </div>
-                <div className={`transition-opacity ${decryptionProgress > 70 ? 'opacity-100' : 'opacity-50'}`}>
-                  &gt; Verifying vote integrity...
-                </div>
-                <div className={`transition-opacity ${decryptionProgress > 90 ? 'opacity-100' : 'opacity-50'}`}>
-                  &gt; Compiling final results...
-                </div>
-              </div>
-              
-              <div className="text-matrix-bright font-mono">
-                {decryptionProgress}% Complete
-              </div>
-            </div>
+            <BarChart3 className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
+            <h2 className="text-2xl font-semibold mb-4">Calculating Results...</h2>
+            <p className="text-muted-foreground mb-6">
+              Processing votes and generating election statistics
+            </p>
+            <Progress value={66} className="w-full max-w-md mx-auto" />
           </CardContent>
         </Card>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card className="w-full max-w-2xl">
+          <CardContent className="text-center py-12">
+            <div className="text-4xl mb-6">⚠️</div>
+            <h1 className="text-2xl font-bold mb-4">
+              Results Not Available
+            </h1>
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <Button 
+              onClick={() => navigate('/')}
+            >
+              Back to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const winner = getWinner();
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold matrix-text mb-4">
-            <span className="animate-digital-form">ELECTION RESULTS</span>
-          </h1>
-          <p className="text-matrix-glow text-lg">
-            Decentralized vote counting completed. Results verified on blockchain.
-          </p>
-          <div className="mt-4 text-matrix-bright font-mono text-xl">
-            Total Votes Cast: {totalVotes.toLocaleString()}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Election Results
+            </h1>
+            {currentElection && (
+              <div>
+                <h2 className="text-2xl font-semibold text-foreground mb-2">
+                  {currentElection.title}
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  {currentElection.description}
+                </p>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  Election Period: {currentElection.startDate.toLocaleDateString()} - {currentElection.endDate.toLocaleDateString()}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Summary Stats */}
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">Total Votes</p>
+                  <p className="text-2xl font-bold">{totalVotes}</p>
+                </div>
+                <BarChart3 className="w-8 h-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">Turnout</p>
+                  <p className="text-2xl font-bold">{turnoutPercentage.toFixed(1)}%</p>
+                </div>
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">Total Voters</p>
+                  <p className="text-2xl font-bold">{currentElection?.totalVoters}</p>
+                </div>
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm">Winner</p>
+                  <p className="text-lg font-bold">{winner?.candidateName || 'N/A'}</p>
+                </div>
+                <Trophy className="w-8 h-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts */}
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
           {/* Bar Chart */}
-          <Card className="matrix-terminal">
+          <Card>
             <CardHeader>
-              <CardTitle className="matrix-text">
-                <span className="text-matrix-bright mr-2">&gt;</span>
-                Vote Distribution
-              </CardTitle>
-              <CardDescription className="text-matrix-glow">
-                Votes per candidate (decrypted results)
-              </CardDescription>
+              <CardTitle>Vote Distribution</CardTitle>
+              <CardDescription>Number of votes per candidate</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={results}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 255, 65, 0.2)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
-                    dataKey="candidate" 
-                    stroke="#00ff41"
+                    dataKey="candidateName" 
+                    stroke="#6b7280"
                     fontSize={12}
                     angle={-45}
                     textAnchor="end"
                     height={80}
                   />
-                  <YAxis stroke="#00ff41" />
+                  <YAxis stroke="#6b7280" />
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: '#000',
-                      border: '1px solid #00ff41',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      color: '#00ff41'
+                      color: '#374151'
                     }}
                   />
                   <Bar 
                     dataKey="votes" 
-                    fill="#00ff41"
-                    stroke="#00cc33"
+                    fill="#3b82f6"
+                    stroke="#2563eb"
                     strokeWidth={1}
                   />
                 </BarChart>
@@ -146,15 +291,10 @@ export const Results = () => {
           </Card>
 
           {/* Pie Chart */}
-          <Card className="matrix-terminal">
+          <Card>
             <CardHeader>
-              <CardTitle className="matrix-text">
-                <span className="text-matrix-bright mr-2">&gt;</span>
-                Vote Percentage
-              </CardTitle>
-              <CardDescription className="text-matrix-glow">
-                Percentage breakdown of all votes
-              </CardDescription>
+              <CardTitle>Vote Percentage</CardTitle>
+              <CardDescription>Percentage breakdown of all votes</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -169,19 +309,19 @@ export const Results = () => {
                     dataKey="votes"
                   >
                     {results.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#000" strokeWidth={2} />
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
                     ))}
                   </Pie>
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: '#000',
-                      border: '1px solid #00ff41',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      color: '#00ff41'
+                      color: '#374151'
                     }}
                     formatter={(value: any, name: any, props: any) => [
-                      `${value} votes (${props.payload.percentage}%)`,
-                      props.payload.candidate
+                      `${value} votes (${props.payload.percentage.toFixed(1)}%)`,
+                      props.payload.candidateName
                     ]}
                   />
                 </PieChart>
@@ -191,35 +331,43 @@ export const Results = () => {
         </div>
 
         {/* Detailed Results */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {results.map((result, index) => (
-            <Card key={index} className="matrix-terminal">
+            <Card key={index} className={result === winner ? 'ring-2 ring-yellow-400' : ''}>
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
-                  <div className="text-2xl font-bold matrix-text" style={{ color: result.color }}>
-                    {index + 1}
+                  <div className="flex items-center justify-center">
+                    <div 
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                      style={{ backgroundColor: result.color }}
+                    >
+                      {index + 1}
+                    </div>
+                    {result === winner && (
+                      <Trophy className="w-6 h-6 text-yellow-500 ml-2" />
+                    )}
                   </div>
+                  
                   <div>
-                    <div className="font-semibold matrix-text text-lg">
-                      {result.candidate}
-                    </div>
-                    <div className="text-matrix-glow text-sm">
-                      {result.party}
+                    <div className="font-semibold text-lg">
+                      {result.candidateName}
                     </div>
                   </div>
+                  
                   <div className="space-y-2">
-                    <div className="text-2xl font-bold matrix-text" style={{ color: result.color }}>
-                      {result.percentage}%
+                    <div className="text-3xl font-bold" style={{ color: result.color }}>
+                      {result.percentage.toFixed(1)}%
                     </div>
-                    <div className="text-matrix-glow font-mono text-sm">
-                      {result.votes.toLocaleString()} votes
+                    <div className="text-muted-foreground font-mono text-sm">
+                      {result.votes} votes
                     </div>
                   </div>
+                  
                   <Progress 
                     value={result.percentage} 
                     className="w-full"
                     style={{ 
-                      background: `linear-gradient(to right, ${result.color}, transparent)`
+                      backgroundColor: `${result.color}20`
                     }}
                   />
                 </div>
@@ -228,65 +376,111 @@ export const Results = () => {
           ))}
         </div>
 
-        {/* Verification Info */}
-        <Card className="matrix-terminal">
+        {/* Voter Information */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="matrix-text">
-              <span className="text-matrix-bright mr-2">&gt;</span>
-              Result Verification
+            <CardTitle className="flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              Voter Information
             </CardTitle>
-            <CardDescription className="text-matrix-glow">
-              Blockchain verification and transparency data
+            <CardDescription>
+              List of voters with their hashed identities for transparency
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-4 text-sm">
-                <div className="space-y-2 text-matrix-glow">
-                  <div className="font-semibold text-matrix-bright">🔒 Cryptographic Verification</div>
-                  <div className="font-mono text-xs space-y-1">
-                    <div>&gt; All votes verified with zero-knowledge proofs</div>
-                    <div>&gt; Threshold decryption completed successfully</div>
-                    <div>&gt; No double-voting detected</div>
-                    <div>&gt; Vote integrity: 100% verified</div>
-                  </div>
-                </div>
+            <div className="space-y-4">
+              {(() => {
+                // Load votes to get voter information
+                const votes: Vote[] = JSON.parse(localStorage.getItem('votes') || '[]');
+                const electionVotes = votes.filter(vote => vote.electionId === electionId);
                 
-                <div className="space-y-2 text-matrix-glow">
-                  <div className="font-semibold text-matrix-bright">⛓️ Blockchain Data</div>
-                  <div className="font-mono text-xs space-y-1">
-                    <div>&gt; Block height: 2,847,392</div>
-                    <div>&gt; Transaction hash: 0x7a8f9b2c...</div>
-                    <div>&gt; Gas used: 2,847,392</div>
-                    <div>&gt; Confirmation: 12/12 nodes</div>
-                  </div>
-                </div>
-              </div>
+                // Group votes by candidate
+                const candidateVoters: { [key: string]: string[] } = {};
+                electionVotes.forEach(vote => {
+                  if (!candidateVoters[vote.candidateId]) {
+                    candidateVoters[vote.candidateId] = [];
+                  }
+                  candidateVoters[vote.candidateId].push(vote.voterId);
+                });
 
-              <div className="space-y-4 text-sm">
-                <div className="space-y-2 text-matrix-glow">
-                  <div className="font-semibold text-matrix-bright">📊 Election Statistics</div>
-                  <div className="font-mono text-xs space-y-1">
-                    <div>&gt; Registered voters: 15,847</div>
-                    <div>&gt; Votes cast: {totalVotes.toLocaleString()}</div>
-                    <div>&gt; Turnout: {((totalVotes / 15847) * 100).toFixed(1)}%</div>
-                    <div>&gt; Invalid votes: 0</div>
-                  </div>
-                </div>
+                return Object.entries(candidateVoters).map(([candidateId, voterIds]) => {
+                  const candidate = currentElection?.candidates.find(c => c.id === candidateId);
+                  if (!candidate) return null;
 
-                <div className="flex space-x-4">
-                  <Button className="matrix-button flex-1">
-                    &gt; Download Audit Report
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="matrix-button flex-1"
-                    onClick={() => window.location.href = '/verify'}
-                  >
-                    &gt; Verify My Vote
-                  </Button>
-                </div>
+                  return (
+                    <div key={candidateId} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-lg">{candidate.name}</h4>
+                        <span className="text-sm text-muted-foreground">
+                          {voterIds.length} vote{voterIds.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {voterIds.map((voterId, index) => (
+                          <div key={index} className="bg-muted/50 rounded p-2 font-mono text-xs break-all">
+                            <span className="text-muted-foreground">Voter {index + 1}:</span>
+                            <br />
+                            <span className="text-primary">{voterId}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+              
+              {(() => {
+                const votes: Vote[] = JSON.parse(localStorage.getItem('votes') || '[]');
+                const electionVotes = votes.filter(vote => vote.electionId === electionId);
+                
+                if (electionVotes.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No votes recorded yet</p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Winner Announcement */}
+        {winner && (
+          <Card className="mb-8 border-yellow-200 bg-yellow-50">
+            <CardContent className="p-8">
+              <div className="text-center">
+                <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+                <h2 className="text-3xl font-bold text-foreground mb-2">
+                  🎉 Winner Announced! 🎉
+                </h2>
+                <h3 className="text-2xl font-semibold text-foreground mb-2">
+                  {winner.candidateName}
+                </h3>
+                <p className="text-lg text-muted-foreground">
+                  Won with {winner.votes} votes ({winner.percentage.toFixed(1)}% of total votes)
+                </p>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Actions */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-center space-x-4">
+              <Button>
+                <Download className="w-4 h-4 mr-2" />
+                Download Results
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/')}
+              >
+                Back to Home
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -294,3 +488,5 @@ export const Results = () => {
     </div>
   );
 };
+
+export default Results;

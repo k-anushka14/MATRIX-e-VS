@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to your Lovable project
 
 ## Project info
@@ -71,3 +72,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+=======
+# Matrix-e-VS
+A secure, government-grade e-voting system using permissioned blockchain, Aadhaar/biometric authentication, and end-to-end encryption. Features are Government-Grade Security – AES-256 encryption + Zero-Knowledge Proofs. Robust Authentication – Aadhaar/eID + biometric + OTP. Scalable Architecture – Designed to handle millions of voters seamlessly
+>>>>>>> 0745f0b10becebc2a113d4ac5c97269f2a6495f1

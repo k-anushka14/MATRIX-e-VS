@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useVotingFlow } from '@/hooks/useVotingFlow';
+import { useAdmin } from '@/contexts/AdminContext';
 
 export const Navigation = () => {
   const location = useLocation();
   const { votingState } = useVotingFlow();
+  const { isAuthenticated } = useAdmin();
 
   // Remove wallet functionality as it's not needed for this system
   // The system tracks voting progress through local state instead
@@ -51,7 +53,7 @@ export const Navigation = () => {
           ))}
         </div>
 
-        {/* System Status - Removed wallet functionality */}
+        {/* System Status and Admin Access */}
         <div className="flex items-center space-x-4">
           <div className="matrix-text text-sm">
             <span className="text-matrix-glow">Status:</span>
@@ -59,6 +61,23 @@ export const Navigation = () => {
               {votingState.canVerify ? 'VOTED' : votingState.isRegistered ? 'REGISTERED' : 'READY'}
             </span>
           </div>
+          
+          {/* Admin Access */}
+          {isAuthenticated ? (
+            <Link
+              to="/admin/dashboard"
+              className="matrix-text px-3 py-2 rounded transition-all duration-300 hover:bg-primary/10 hover:text-matrix-neon"
+            >
+              &gt; Admin Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/admin/login"
+              className="matrix-text px-3 py-2 rounded transition-all duration-300 hover:bg-primary/10 hover:text-matrix-neon"
+            >
+              &gt; Admin Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

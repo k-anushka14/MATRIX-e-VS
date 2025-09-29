@@ -3,13 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { MatrixBackground } from "@/components/MatrixBackground";
-import { Navigation } from "@/components/Navigation";
 import Index from "./pages/Index";
-import { Register } from "./pages/Register";
-import { Vote } from "./pages/Vote";
-import { Results } from "./pages/Results";
-import { Verify } from "./pages/Verify";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import CreateElection from "./pages/CreateElection";
+import VoterLanding from "./pages/VoterLanding";
+import VoterRegistration from "./pages/VoterRegistration";
+import Voting from "./pages/Voting";
+import Results from "./pages/Results";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,16 +21,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="relative min-h-screen bg-background">
-          <MatrixBackground />
-          <Navigation />
+        <div className="min-h-screen bg-background">
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/vote" element={<Vote />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/verify" element={<Verify />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/vote/:electionId" element={<VoterLanding />} />
+            <Route path="/register/:electionId" element={<VoterRegistration />} />
+            <Route path="/voting/:electionId" element={<Voting />} />
+            <Route path="/results/:electionId" element={<Results />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/create-election" element={<CreateElection />} />
+            
+            {/* Catch-all Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

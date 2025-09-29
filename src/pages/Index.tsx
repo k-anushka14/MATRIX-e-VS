@@ -52,14 +52,14 @@ const Index = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Link to="/register">
+            <Link to="/admin/login">
               <Button className="matrix-button text-lg px-8 py-4">
-                &gt; START REGISTRATION
+                &gt; ADMIN LOGIN
               </Button>
             </Link>
-            <Link to="/vote">
-              <Button variant="outline" className="matrix-button text-lg px-8 py-4">
-                &gt; CAST VOTE
+            <Link to="/admin/login">
+              <Button variant="outline" className="matrix-button text-lg px-8 py-4 border-matrix-neon text-matrix-neon hover:bg-matrix-neon/10">
+                &gt; GET VOTING LINK
               </Button>
             </Link>
           </div>
@@ -128,13 +128,13 @@ const Index = () => {
 
         <div className="grid md:grid-cols-4 gap-8">
           {[
-            { step: '01', title: 'Register', desc: 'Upload ID, create digital fingerprint', path: '/register' },
-            { step: '02', title: 'Verify', desc: 'Blockchain verification & biometric check', path: '/register' },
-            { step: '03', title: 'Vote', desc: 'Select candidate, encrypt & submit vote', path: '/vote' },
-            { step: '04', title: 'Confirm', desc: 'Verify vote recorded on blockchain', path: '/verify' }
+            { step: '01', title: 'Get Link', desc: 'Admin creates election & shares voting link', path: '/admin/login' },
+            { step: '02', title: 'Register', desc: 'Upload documents & biometric verification', path: '/admin/login' },
+            { step: '03', title: 'Vote', desc: 'Select candidate & cast encrypted vote', path: '/admin/login' },
+            { step: '04', title: 'Results', desc: 'View election results & statistics', path: '/admin/login' }
           ].map((item, index) => (
-            <Link key={index} to={item.path}>
-              <Card className="matrix-terminal h-full hover:bg-primary/5 transition-all duration-300 cursor-pointer">
+            <div key={index}>
+              <Card className="matrix-terminal h-full hover:bg-primary/5 transition-all duration-300">
                 <CardContent className="pt-6 text-center">
                   <div className="text-3xl font-bold text-matrix-bright mb-4">
                     {item.step}
@@ -147,7 +147,7 @@ const Index = () => {
                   </p>
                 </CardContent>
               </Card>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
