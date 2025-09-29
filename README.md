@@ -1,78 +1,97 @@
-<<<<<<< HEAD
-# Welcome to your Lovable project
+:
 
-## Project info
+🕶️ MATRIX e-VS – Matrix-Themed E-Voting System
+📌 Overview
 
-**URL**: https://lovable.dev/projects/eb441336-6c80-45fc-aebf-ba8088901815
+Traditional voting methods often suffer from issues such as tampering, lack of privacy, difficulty in managing elections, and absence of verifiable proof for voters.
+MATRIX e-VS is a Matrix-themed electronic voting system that ensures secure, verifiable, and tamper-proof elections with a futuristic UI inspired by The Matrix.
+✨ Features
 
-## How can I edit this code?
+🔒 Secure Voting → Votes are encrypted (SHA-256 + AES) and cannot be traced back.
 
-There are several ways of editing your application.
+🆔 Verifiable Identity → Each voter gets a unique digital ID to confirm their vote.
 
-**Use Lovable**
+🛠 Admin Dashboard → Admin can set timelines, add candidates, and manage elections.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/eb441336-6c80-45fc-aebf-ba8088901815) and start prompting.
+🖥 Matrix-Themed UI → Futuristic interface with React + Tailwind + Three.js.
 
-Changes made via Lovable will be committed automatically to this repo.
+📊 Tamper-Proof Results → Results downloadable as PDF and visualized with charts.
 
-**Use your preferred IDE**
+🏗️ System Architecture
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Frontend → React, Tailwind CSS, Three.js
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Backend → Flask / Node.js
 
-Follow these steps:
+Database → SQLite / MongoDB (lightweight for hackathon use)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Security → SHA-256 hashing + AES encryption
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Reports → Chart.js for graphs, PDF export for results
 
-# Step 3: Install the necessary dependencies.
-npm i
+⚙️ Feasibility
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+✅ Technical → Simple full-stack with standard security (perfect for hackathon).
 
-**Edit a file directly in GitHub**
+✅ Operational → Suitable for small organizations, college elections, clubs.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+✅ Economic → Open-source & runs on free hosting tiers.
 
-**Use GitHub Codespaces**
+⚠️ Scalability → Needs replication, DDoS protection, and compliance for large-scale use.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+🚀 Future Scope
 
-## What technologies are used for this project?
+⛓ Blockchain-based transparent vote ledger
 
-This project is built with:
+🔏 Homomorphic encryption & ZK-Proofs for privacy
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+🏛 Compliance with election laws (ECI/NIST, GDPR, CCPA)
 
-## How can I deploy this project?
+📱 Mobile app (Android/iOS) with biometric verification
 
-Simply open [Lovable](https://lovable.dev/projects/eb441336-6c80-45fc-aebf-ba8088901815) and click on Share -> Publish.
+🤖 AI for fraud detection & turnout prediction
 
-## Can I connect a custom domain to my Lovable project?
+🌍 Multi-language support for accessibility
 
-Yes, you can!
+⚡ Limitations
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+❌ Not scalable to millions of voters yet
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-=======
-# Matrix-e-VS
-A secure, government-grade e-voting system using permissioned blockchain, Aadhaar/biometric authentication, and end-to-end encryption. Features are Government-Grade Security – AES-256 encryption + Zero-Knowledge Proofs. Robust Authentication – Aadhaar/eID + biometric + OTP. Scalable Architecture – Designed to handle millions of voters seamlessly
->>>>>>> 0745f0b10becebc2a113d4ac5c97269f2a6495f1
+🌐 Requires stable internet connectivity
+
+🆔 Basic authentication → risk of duplicate/fake voters
+
+🎨 Matrix theme may confuse non-technical users if not simplified
+
+📜 Needs legal audits & compliance for real-world elections
+Repository Structure
+/src
+ ├── components     # UI Components
+ ├── pages          # Pages (Login, Voting, Results, Admin Dashboard)
+ ├── contexts       # State Management
+ ├── types          # Type definitions
+/public
+ ├── index.html     # Entry point
+ └── assets         # Static files
+
+🚦 Getting Started
+🔹 Prerequisites
+
+Node.js & npm installed
+
+Git installed
+
+🔹 Clone & Install
+git clone https://github.com/k-anushka14/MATRIX-e-VS.git
+cd MATRIX-e-VS
+npm install
+
+🔹 Run Locally
+npm start
+
+🔹 Build for Production
+npm run build
+
+📜 License
+
+This project is open-source and available under the MIT License.
