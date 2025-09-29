@@ -1,97 +1,98 @@
-:
+🕶️ MATRIX e-VS
 
-🕶️ MATRIX e-VS – Matrix-Themed E-Voting System
-📌 Overview
+A Matrix-themed electronic voting system designed to make small-scale elections secure, verifiable, and futuristic.
 
-Traditional voting methods often suffer from issues such as tampering, lack of privacy, difficulty in managing elections, and absence of verifiable proof for voters.
-MATRIX e-VS is a Matrix-themed electronic voting system that ensures secure, verifiable, and tamper-proof elections with a futuristic UI inspired by The Matrix.
-✨ Features
+📌 About the Project
 
-🔒 Secure Voting → Votes are encrypted (SHA-256 + AES) and cannot be traced back.
+MATRIX e-VS reimagines voting in a digital era. Instead of paper ballots or insecure online forms, it offers:
 
-🆔 Verifiable Identity → Each voter gets a unique digital ID to confirm their vote.
+A modern, encrypted system that protects votes.
 
-🛠 Admin Dashboard → Admin can set timelines, add candidates, and manage elections.
+An admin dashboard for managing elections.
 
-🖥 Matrix-Themed UI → Futuristic interface with React + Tailwind + Three.js.
+A Matrix-inspired user interface that feels innovative and futuristic.
 
-📊 Tamper-Proof Results → Results downloadable as PDF and visualized with charts.
+Our goal is to provide a solution that is simple enough for hackathons and small communities, but has the potential to scale with advanced features in the future.
 
-🏗️ System Architecture
+✨ Key Features
+
+🔐 End-to-End Security → Voter identities are private; votes are encrypted.
+
+🆔 Digital Voter ID → Each voter gets a unique ID to confirm their submission.
+
+🖥 Admin Controls → Manage candidates, set timelines, and distribute voting links.
+
+🕶️ Matrix UI → A cyberpunk-inspired design for admins and voters.
+
+📊 Result Reports → Visual charts and downloadable PDFs for transparency.
+
+🛠️ Tech Stack
 
 Frontend → React, Tailwind CSS, Three.js
-
 Backend → Flask / Node.js
+Database → SQLite or MongoDB
+Security → SHA-256 Hashing + AES Encryption
+Visualization → Chart.js, PDF Export
 
-Database → SQLite / MongoDB (lightweight for hackathon use)
+🚀 Future Possibilities
 
-Security → SHA-256 hashing + AES encryption
+Blockchain-based vote ledger for absolute transparency
 
-Reports → Chart.js for graphs, PDF export for results
+Mobile app with biometric authentication
 
-⚙️ Feasibility
+Multi-language & accessibility support
 
-✅ Technical → Simple full-stack with standard security (perfect for hackathon).
+AI-driven fraud detection and analytics
 
-✅ Operational → Suitable for small organizations, college elections, clubs.
+Compliance with election standards (ECI, GDPR, NIST)
 
-✅ Economic → Open-source & runs on free hosting tiers.
+⚡ Why MATRIX e-VS?
 
-⚠️ Scalability → Needs replication, DDoS protection, and compliance for large-scale use.
+✅ Trustworthy → Built with security at its core
 
-🚀 Future Scope
+✅ Hackathon-Friendly → Lightweight, deployable on free tiers
 
-⛓ Blockchain-based transparent vote ledger
+✅ Customizable → Adaptable for clubs, colleges, and small organizations
 
-🔏 Homomorphic encryption & ZK-Proofs for privacy
-
-🏛 Compliance with election laws (ECI/NIST, GDPR, CCPA)
-
-📱 Mobile app (Android/iOS) with biometric verification
-
-🤖 AI for fraud detection & turnout prediction
-
-🌍 Multi-language support for accessibility
-
-⚡ Limitations
-
-❌ Not scalable to millions of voters yet
-
-🌐 Requires stable internet connectivity
-
-🆔 Basic authentication → risk of duplicate/fake voters
-
-🎨 Matrix theme may confuse non-technical users if not simplified
-
-📜 Needs legal audits & compliance for real-world elections
-Repository Structure
+⚠️ Not yet production-ready → Needs scaling, compliance, and audits for real-world use
+📂 Project Structure
 /src
- ├── components     # UI Components
- ├── pages          # Pages (Login, Voting, Results, Admin Dashboard)
- ├── contexts       # State Management
- ├── types          # Type definitions
+ ├── components     # Reusable UI elements
+ ├── pages          # Voter & Admin pages
+ ├── contexts       # App state management
+ ├── types          # TypeScript definitions
 /public
- ├── index.html     # Entry point
- └── assets         # Static files
-
-🚦 Getting Started
-🔹 Prerequisites
+ ├── index.html     # App entry
+ └── assets         # Static assets
+ 🚦 Getting Started
+Prerequisites
 
 Node.js & npm installed
 
 Git installed
 
-🔹 Clone & Install
+Clone & Install
 git clone https://github.com/k-anushka14/MATRIX-e-VS.git
 cd MATRIX-e-VS
 npm install
 
-🔹 Run Locally
+Run Locally
 npm start
 
-🔹 Build for Production
+Build for Production
 npm run build
+
+👥 Team HackTrix
+
+Anushka Kawalkar – AISSMS IOIT
+
+Prajakta Kamble – AISSMS IOIT
+
+Mrunal Thakare – AISSMS IOIT
 
 📜 License
 
-This project is open-source and available under the MIT License.
+This project is licensed under the MIT License.
+
+
+📂 Project Structure
