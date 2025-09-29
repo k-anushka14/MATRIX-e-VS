@@ -55,16 +55,8 @@ Compliance with election standards (ECI, GDPR, NIST)
 ✅ Customizable → Adaptable for clubs, colleges, and small organizations
 
 ⚠️ Not yet production-ready → Needs scaling, compliance, and audits for real-world use
-📂 Project Structure
-/src
- ├── components     # Reusable UI elements
- ├── pages          # Voter & Admin pages
- ├── contexts       # App state management
- ├── types          # TypeScript definitions
-/public
- ├── index.html     # App entry
- └── assets         # Static assets
- 🚦 Getting Started
+
+
 Prerequisites
 
 Node.js & npm installed
@@ -95,4 +87,3 @@ Mrunal Thakare – AISSMS IOIT
 This project is licensed under the MIT License.
 
 
-📂 Project Structure
