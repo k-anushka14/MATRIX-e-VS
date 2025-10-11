@@ -1,0 +1,199 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "Ravi Sharma",
+            "aadhaar": {
+                "id_number": "1234-5678-9012",
+                "photo": "images/ravi_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "MH1234567",
+                "photo": "images/ravi_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 2,
+            "name": "Neha Patil",
+            "aadhaar": {
+                "id_number": "4567-8901-2345",
+                "photo": "images/neha_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "MH7654321",
+                "photo": "images/neha_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 3,
+            "name": "Amit Verma",
+            "aadhaar": {
+                "id_number": "8901-2345-6789",
+                "photo": "images/amit_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "DL2345678",
+                "photo": "images/amit_voter_mismatch.jpg"
+            },
+            "verification_status": "not_verified"
+        },
+        {
+            "id": 4,
+            "name": "Sneha Kulkarni",
+            "aadhaar": {
+                "id_number": "6789-0123-4567",
+                "photo": "images/sneha_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "MH9876543",
+                "photo": "images/sneha_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 5,
+            "name": "Rahul Deshmukh",
+            "aadhaar": {
+                "id_number": "2345-6789-0123",
+                "photo": "images/rahul_aadhaar_wrong.jpg"
+            },
+            "voter": {
+                "id_number": "MH2233445",
+                "photo": "images/rahul_voter.jpg"
+            },
+            "verification_status": "not_verified"
+        },
+        {
+            "id": 6,
+            "name": "Priya Mehta",
+            "aadhaar": {
+                "id_number": "9012-3456-7890",
+                "photo": "images/priya_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "GJ4567890",
+                "photo": "images/priya_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 7,
+            "name": "Karan Joshi",
+            "aadhaar": {
+                "id_number": "7890-1234-5678",
+                "photo": "images/karan_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "RJ3344556",
+                "photo": "images/karan_voter_wrong.jpg"
+            },
+            "verification_status": "not_verified"
+        },
+        {
+            "id": 8,
+            "name": "Anjali Nair",
+            "aadhaar": {
+                "id_number": "3456-7890-1234",
+                "photo": "images/anjali_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "KL9876543",
+                "photo": "images/anjali_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 9,
+            "name": "Vivek Singh",
+            "aadhaar": {
+                "id_number": "5678-9012-3456",
+                "photo": "images/vivek_aadhaar_mismatch.jpg"
+            },
+            "voter": {
+                "id_number": "UP2233445",
+                "photo": "images/vivek_voter.jpg"
+            },
+            "verification_status": "not_verified"
+        },
+        {
+            "id": 10,
+            "name": "Pooja Chavan",
+            "aadhaar": {
+                "id_number": "9012-6789-1234",
+                "photo": "images/pooja_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "MH8765432",
+                "photo": "images/pooja_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 11,
+            "name": "Rohit Patil",
+            "aadhaar": {
+                "id_number": "1122-3344-5566",
+                "photo": "images/rohit_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "MH4455667",
+                "photo": "images/rohit_voter_mismatch.jpg"
+            },
+            "verification_status": "not_verified"
+        },
+        {
+            "id": 12,
+            "name": "Shruti Desai",
+            "aadhaar": {
+                "id_number": "7788-9900-1122",
+                "photo": "images/shruti_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "MH3344556",
+                "photo": "images/shruti_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 13,
+            "name": "Deepak Kumar",
+            "aadhaar": {
+                "id_number": "2233-4455-6677",
+                "photo": "images/deepak_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "BR5566778",
+                "photo": "images/deepak_voter.jpg"
+            },
+            "verification_status": "verified"
+        },
+        {
+            "id": 14,
+            "name": "Mitali Ghosh",
+            "aadhaar": {
+                "id_number": "3344-5566-7788",
+                "photo": "images/mitali_aadhaar_wrong.jpg"
+            },
+            "voter": {
+                "id_number": "WB4455667",
+                "photo": "images/mitali_voter.jpg"
+            },
+            "verification_status": "not_verified"
+        },
+        {
+            "id": 15,
+            "name": "Sanjay Pandey",
+            "aadhaar": {
+                "id_number": "4455-6677-8899",
+                "photo": "images/sanjay_aadhaar.jpg"
+            },
+            "voter": {
+                "id_number": "UP5566778",
+                "photo": "images/sanjay_voter.jpg"
+            },
+            "verification_status": "verified"
+        }
+    ]
+}
