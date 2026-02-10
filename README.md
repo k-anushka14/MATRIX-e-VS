@@ -78,7 +78,6 @@ The **Matrix-Themed E-Voting System** provides:
 
 - Not optimized for millions of voters
 - Requires stable internet connection
-- Basic authentication can allow fake registrations
 - Needs legal compliance for real-world deployment
 
 ---
