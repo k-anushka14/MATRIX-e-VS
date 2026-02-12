@@ -1,93 +1,106 @@
-🗳️ Matrix-Themed Government-Grade Voting System
+# 🗳️ Matrix-Themed E-Voting System
 
-A secure, transparent, and futuristic e-voting platform designed for government-level elections.
+A secure, transparent, and verifiable **E-Voting System** built using modern web technologies and encryption techniques.  
+Designed as a hackathon project to demonstrate how digital voting can be made more reliable and user-friendly.
 
-This project leverages permissioned blockchain, Aadhaar/biometric authentication, end-to-end encryption  to ensure tamper-proof elections while empowering citizens to verify their votes without compromising secrecy. The Matrix-inspired UI adds a unique, engaging visualization for dashboards and awareness campaigns.
+---
 
-🌟 Key Features
+## 📌 Problem Statement
 
-🔐 Government-Grade Security: AES-256 encryption + Zero-Knowledge Proofs for secure and verifiable voting.
+Traditional voting systems suffer from:
+- Vote tampering and manipulation
+- Lack of voter verification
+- Privacy and trust issues
+- Manual, time-consuming election management
 
-🪪 Robust Authentication: Aadhaar/eID + biometric + OTP ensures only eligible voters can vote.
+---
 
- Dashboard Modes:
+## 💡 Our Solution
 
-Matrix Mode – futuristic glitch visualization for transparency campaigns.
+The **Matrix-Themed E-Voting System** provides:
+- Encrypted and anonymous voting
+- Vote verification without revealing voter identity
+- Admin-controlled election setup
+- Tamper-proof result generation
+- A modern Matrix-inspired UI
 
-🌍 Scalable Architecture: Designed to handle millions of votes efficiently.
+---
 
-🏛️ System Architecture
+## 🚀 Key Features
 
-Identity & Authentication
+- 🔐 Secure vote encryption (AES + SHA-256)
+- 🆔 Unique digital identity for each voter
+- 🛠 Admin dashboard for election management
+- 📊 Real-time result visualization
+- 📄 Downloadable, tamper-proof PDF results
+- 🎨 Matrix-themed futuristic UI
 
-Aadhaar/eID + biometric + OTP.
+---
 
-Temporary election wallet for one-time vote.
+## 🛠 Technology Stack
 
-Vote Casting
+**Frontend**
+- React
+- Tailwind CSS
+- Three.js
 
-Encrypted ballot (AES-256).
+**Backend**
+- Flask / Node.js
+- REST APIs
 
-Stored in permissioned blockchain (Hyperledger/Quorum/Tendermint).
+**Database**
+- SQLite / MongoDB
 
-Verification & Counting
+**Security**
+- AES Encryption
+- SHA-256 Hashing
 
-Votes tallied via Zero-Knowledge Proofs / Homomorphic Encryption.
+---
 
-Election Commission dashboard with official + Matrix visualization.
+## 🔄 System Workflow
 
-💻 Tech Stack
+1. Admin creates election and adds candidates  
+2. Voters register and receive a unique voting link/ID  
+3. Votes are encrypted and securely stored  
+4. Results are calculated and exported as PDF  
 
-Frontend: Next.js + TailwindCSS + Matrix-style animations
+---
 
-Backend: Node.js / Python (Flask/FastAPI)
+## ⚙ Practical Feasibility
 
-Blockchain: Hyperledger Fabric / Quorum (Permissioned)
+- Built using open-source tools
+- Easy to deploy on basic servers or free cloud tiers
+- Suitable for small to mid-scale elections
 
-Database: PostgreSQL / IPFS (for logs)
+---
 
-Security: AES-256 encryption, Zero-Knowledge Proofs, Homomorphic Encryption
+## ⚠ Limitations
 
-Other: QR code generator, Biometric APIs (simulated for hackathon)
+- Not optimized for millions of voters
+- Requires stable internet connection
+- Basic authentication can allow fake registrations
+- Needs legal compliance for real-world deployment
 
-🚀 Future Scope
+---
 
-Nationwide deployment for millions of voters.
+## 🔮 Future Scope
 
-Offline polling support for rural areas.
+- Blockchain-based audit logs
+- Advanced authentication (biometrics / face ID)
+- Mobile application support
+- Multi-language accessibility
+- Cloud-native scalable architecture
 
-Integration with UIDAI & Election Commission APIs.
+---
 
-AI-powered anomaly detection for fraud prevention.
+## 👥 Team Members
 
-Global adoption for transparent democracy.
+- Anushka Kawalkar  
+- Prajakta Kamble  
+- Mrunal Thakare  
 
-🎨 Why This Project is Unique
-Normal Hackathon Voting	Matrix-Themed Govt Voting System
-Simple wallet login	Aadhaar/eID + biometric + OTP
-Only stores votes	Encryption + QR + VVPAT
-Toy-scale demos	Scalable for millions
-No compliance	Legal-ready: Aadhaar + VVPAT
-Simple UI	Dual UI: Official + Matrix Mode
-📂 Getting Started
+---
 
-Clone the repository:
+## 📄 License
 
-git clone <repo-link>
-
-
-Install dependencies:
-
-npm install   # frontend  
-pip install -r requirements.txt   # backend  
-
-
-Run the application:
-
-npm run dev   # frontend  
-python app.py   # backend  
-
-
-Open your browser at http://localhost:3000
-
-⚠️ Hackathon demo uses simulated Aadhaar/biometric authentication. Real deployment requires government API integration.
+This project is developed for educational and hackathon purposes.

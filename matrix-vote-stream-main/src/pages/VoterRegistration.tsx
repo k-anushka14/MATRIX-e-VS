@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -47,6 +48,40 @@ const VoterRegistration = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const demoProfiles = {
+    aadhaar: {
+      name: 'Ravi Sharma',
+      idNumber: '1234-5678-9012',
+      fileName: 'demo_ravi_aadhaar.jpg'
+    },
+    voter: {
+      name: 'Ravi Sharma',
+      idNumber: 'MH1234567',
+      fileName: 'demo_ravi_voter.jpg'
+    }
+  } as const;
+
+  const createDemoDocument = () => {
+    const profile = demoProfiles[documentType];
+    const documentLabel = documentType === 'aadhaar' ? 'Aadhaar Card' : 'Voter ID Card';
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#f8fafc" />
+  <rect x="24" y="24" width="752" height="452" rx="16" fill="#ffffff" stroke="#e2e8f0" />
+  <text x="50" y="80" font-family="Arial, sans-serif" font-size="28" fill="#0f172a">${documentLabel} (DEMO)</text>
+  <text x="50" y="130" font-family="Arial, sans-serif" font-size="18" fill="#334155">Name: ${profile.name}</text>
+  <text x="50" y="165" font-family="Arial, sans-serif" font-size="18" fill="#334155">ID: ${profile.idNumber}</text>
+  <rect x="50" y="210" width="140" height="180" fill="#e2e8f0" stroke="#cbd5f5" />
+  <text x="70" y="305" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Demo Photo</text>
+  <text x="50" y="420" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">For testing only. Not a real government document.</text>
+</svg>`;
+    const file = new File([svg], profile.fileName, { type: 'image/svg+xml' });
+
+    setIdFile(file);
+    setIdNumber(profile.idNumber);
+    setError('');
+  };
 
   useEffect(() => {
     // Load election data
@@ -304,10 +339,30 @@ const VoterRegistration = () => {
                       Upload a clear image of your {documentType === 'aadhaar' ? 'Aadhaar Card' : 'Voter ID Card'}
                     </p>
                     {idFile && (
-                      <div className="p-2 bg-muted rounded border">
+                      <div className="p-2 bg-muted rounded border flex items-center justify-between">
                         <p className="text-sm text-green-600">✓ {idFile.name}</p>
+                        {idFile.name.startsWith('demo_') && (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
                       </div>
                     )}
+                  </div>
+
+                  <div className="rounded-lg border bg-muted/40 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-foreground">Demo Data</div>
+                      <Badge variant="outline">DEMO</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Use a prebuilt demo {documentType === 'aadhaar' ? 'Aadhaar' : 'Voter ID'} document and ID number.
+                    </p>
+                    <div className="text-sm text-muted-foreground">
+                      <div className="font-medium text-foreground">{demoProfiles[documentType].name}</div>
+                      <div>ID: {demoProfiles[documentType].idNumber}</div>
+                    </div>
+                    <Button type="button" variant="secondary" onClick={createDemoDocument} className="w-full">
+                      Use Demo {documentType === 'aadhaar' ? 'Aadhaar' : 'Voter ID'}
+                    </Button>
                   </div>
 
                   <Button
